@@ -8,6 +8,8 @@ import ManageExpenceScreen from "./screens/ManageExpenceScreen";
 import RecentExpencesScreen from "./screens/RecentExpencesScreen";
 import AllExpencesScreen from "./screens/AllExpencesScreen";
 import { GlobalStyles } from "./constants/styles"; //импорт цветов
+import IconButton from "./components/UI/IconButton";
+import ExpensesContextProvider from "./store/expenses-context";
 
 const Stack = createNativeStackNavigator(); //создаем стек навигации
 const BottomTab = createBottomTabNavigator(); //создаем нижнюю навигацию
@@ -15,13 +17,23 @@ const BottomTab = createBottomTabNavigator(); //создаем нижнюю на
 function ExpensecOverview() {
   return (
     <BottomTab.Navigator
-      screenOptions={{
+      screenOptions={({ navigation }) => ({
         headerStyle: { backgroundColor: GlobalStyles.colors.primary200 },
-        headerTintColor: GlobalStyles.colors.primary800,
+        headerTintColor: GlobalStyles.colors.white,
         tabBarStyle: { backgroundColor: GlobalStyles.colors.primary100 },
         tabBarActiveTintColor: GlobalStyles.colors.accent500,
         tabBarInactiveTintColor: GlobalStyles.colors.primary700,
-      }}
+        headerRight: ({ tintColor }) => (
+          <IconButton
+            icon="add"
+            size={24}
+            color={tintColor}
+            onPress={() => {
+              navigation.navigate("ManageExpence");
+            }}
+          />
+        ),
+      })}
     >
       <BottomTab.Screen
         name="RecentExpencesScreen"
@@ -35,7 +47,7 @@ function ExpensecOverview() {
         }}
       />
       <BottomTab.Screen
-        name="ManageExpenceScreen"
+        name="AllExpenses"
         component={AllExpencesScreen}
         options={{
           title: "All Expences",
@@ -44,7 +56,6 @@ function ExpensecOverview() {
             <Ionicons name="calendar" size={size} color={color} />
           ),
         }}
-
       />
     </BottomTab.Navigator>
   );
@@ -54,19 +65,30 @@ export default function App() {
   return (
     <>
       <StatusBar style="auto" />
+      <ExpensesContextProvider>
       <NavigationContainer>
-        <Stack.Navigator>
+        <Stack.Navigator
+          screenOptions={{
+            headerStyle: { backgroundColor: GlobalStyles.colors.primary200 },
+            headerTintColor: GlobalStyles.colors.white,
+          }}
+        >
           <Stack.Screen
             name="ExpensecOverview"
             component={ExpensecOverview}
             options={{ headerShown: false }}
           />
           <Stack.Screen
-            name="ManageExpenceScreen"
+            name="ManageExpence"
             component={ManageExpenceScreen}
+            options={{
+              title: "Expence",
+              presentation: "modal",
+            }}
           />
         </Stack.Navigator>
       </NavigationContainer>
+      </ExpensesContextProvider>
     </>
   );
 }
@@ -74,3 +96,5 @@ export default function App() {
 /* создаем стек навигации */
 // <NavigationContainer> мы можем веутри него опрделедить, какой экран будет отображаться первым
 // или же мы можем просто ставить экраны в том порядке, в котором они должны отображаться
+
+// presentation: "modal" - важно для появления окна на ios. Оно снизу вверх, а не сбоку

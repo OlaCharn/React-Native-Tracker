@@ -1,51 +1,42 @@
-import { View } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import ExpencesSummary from "./ExpencesSummary";
 import ExpencesList from "./ExpencesList";
-
-const DUMMY_EXPENCES = [
-  {
-    id: "e1",
-    description: "New Shoes",
-    amount: 99.99,
-    date: new Date("2024-01-14"),
-  },
-  {
-    id: "e2",
-    description: "New Rock",
-    amount: 19.99,
-    date: new Date("2024-02-14"),
-  },
-  {
-    id: "e3",
-    description: "New Bag",
-    amount: 199.99,
-    date: new Date("2024-01-15"),
-  },
-  {
-    id: "e4",
-    description: "Book",
-    amount: 19.99,
-    date: new Date("2024-03-05"),
-  },
-  {
-    id: "e5",
-    description: "Book",
-    amount: 9.99,
-    date: new Date("2024-03-10"),
-  },
-
-]
+import { GlobalStyles } from "../../constants/styles";
 
 // expences={DUMMY_EXPENCES} - это так мы получаем доступ к данным из DUMMY_EXPENCES
 // но впоследствии мы будем получать данные от юзера
 
-function ExpencesOutput({ expences, expencesPeriod }) {
+function ExpencesOutput({ expences, expencesPeriod, fallbackText }) {
+  //console.log(DUMMY_EXPENCES); // Должно показать массив расходов в консоли
+
+  let content = <Text style={styles.infoText}> {fallbackText} </Text>;
+
+  if (expences.length > 0) {
+    content = <ExpencesList expences={expences} />;
+  }
+
   return (
-    <View>
-      <ExpencesSummary expences={DUMMY_EXPENCES} periodName={expencesPeriod} />
-      <ExpencesList expences={DUMMY_EXPENCES} />
+    <View style={styles.container}>
+      <ExpencesSummary expences={expences} periodName={expencesPeriod} />
+
+      {content}
     </View>
   );
 }
 
 export default ExpencesOutput;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    backgroundColor: GlobalStyles.colors.primary700,
+  },
+  infoText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 40,
+  },
+});
