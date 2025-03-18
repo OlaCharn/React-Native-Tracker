@@ -8,6 +8,7 @@ import { GlobalStyles } from "../../constants/styles";
 
 function ExpencesOutput({ expences, expencesPeriod, fallbackText }) {
   //console.log(DUMMY_EXPENCES); // Должно показать массив расходов в консоли
+  
 
   let content = <Text style={styles.infoText}> {fallbackText} </Text>;
 
@@ -39,4 +40,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 40,
   },
+  
 });
