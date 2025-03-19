@@ -1,7 +1,7 @@
 import { View, Text, TextInput, StyleSheet } from "react-native";
 import { GlobalStyles } from "../../constants/styles";
 
-function Input({ label, style, textInputConfig }) {
+function Input({ label, style, inValid, textInputConfig }) {
   //это сделано для применения отдельного стиля к строке ввода description,
   //чтобы обеспечить применение стиля не только общего, но и конкретного для multiline
   //смотри, что в инпуте ссылаемся не на styles.input, а на нашу переменную inputStyles
@@ -10,9 +10,12 @@ function Input({ label, style, textInputConfig }) {
     inputStyles.push(styles.inputMultiline);
   }
 
+  if(inValid) {
+    inputStyles.push(styles.inValidInput)
+  }
   return (
     <View style={[styles.inputContainer, style]}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label , inValid && styles.inValidLabel ]}>{label}</Text>
       <TextInput style={inputStyles} {...textInputConfig} />
     </View>
   );
@@ -43,4 +46,10 @@ const styles = StyleSheet.create({
     minHeight: 100,
     textAlignVertical: "top",
   },
+  inValidLabel: {
+    color: GlobalStyles.colors.accent500,
+  },
+  inValidInput: {
+    backgroundColor: GlobalStyles.colors.accent500
+  }
 });

@@ -17,6 +17,10 @@ function ManageExpenceScreen({ route, navigation }) {
   const editedExpenseId = route.params?.expenseId;
   const isEditing = !!editedExpenseId; //с помощью !! преобразуем в boolean
 
+  const selectedExpense = expensesCtx.expenses.find(
+    (expense) => expense.id === editedExpenseId
+  );
+
   //используем useLayoutEffect чтобы изменить navigation в зависимости от того, откуда было вызвано окно
   useLayoutEffect(() => {
     //конфигурируем navigation в зависимости от того, откуда было вызвано окно
@@ -68,6 +72,7 @@ function ManageExpenceScreen({ route, navigation }) {
         onSubmit={AddAndUpdateHandler}
         onCancel={cancelHandler}
         submitButtonLabel={isEditing ? "Update" : "Add"}
+        defaultValues = {selectedExpense}
       />
       {isEditing && (
         <View style={styles.deleteContainer}>
