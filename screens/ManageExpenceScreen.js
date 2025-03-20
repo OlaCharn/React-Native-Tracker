@@ -1,11 +1,16 @@
-import { useContext, useLayoutEffect } from "react";
+import { useContext, useLayoutEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import IconButton from "../components/UI/IconButton";
 import { GlobalStyles } from "../constants/styles";
 import { ExpensesContext } from "../store/expenses-context";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
+import { deleteExpense, storeExpense, updateExpense } from "../util/http";
+import LoadingOverlay from "../components/UI/LoadingOverlay";
+import ErrorOverlay from "../components/UI/ErrorOverlay";
 
 function ManageExpenceScreen({ route, navigation }) {
+  const [error, setError] = useState(); //для ошибок при фетче
+  const [isLoading, setIsLoading] = useState(false); //для loader
   const expensesCtx = useContext(ExpensesContext); //чтобы иметь доступ к управдению состоянием в expenses-context
 
   //НАВИГАЦИЯ
@@ -31,39 +36,52 @@ function ManageExpenceScreen({ route, navigation }) {
 
   //КНОПКИ с состоянием из контекста
 
-  function deleteExpenseHandler() {
-    expensesCtx.deleteExpense(editedExpenseId);
-    navigation.goBack();
+  async function deleteExpenseHandler() {
+    setIsLoading(true);
+    try {
+      await deleteExpense(editedExpenseId);
+      expensesCtx.deleteExpense(editedExpenseId); //мы обновляем локально сначала перед тем, как посылать request
+      navigation.goBack();
+    } catch (error) {
+      setError("Could not delete expense. Please try later!");
+      setIsLoading(false);
+    }
   }
 
   function cancelHandler() {
     navigation.goBack();
   }
 
-  function AddAndUpdateHandler(expenseData) {
-    if (isEditing) {
-      expensesCtx.updateExpense(
-        editedExpenseId,
-        expenseData
-        // мы заменили эти dummy данные на expenseData из ExpenseForm
-        //{
-        //description: "test!!!",
-        //amount: 10.0,
-        //date: new Date("2030-10-10"),
-        //  }
-      );
-    } else {
-      expensesCtx.addExpense(
-        expenseData
-        // мы заменили эти dummy данные на expenseData из ExpenseForm
-        // {
-        // description: "test",
-        // amount: 100.0,
-        // date: new Date("2025-10-10"),
-        //}
-      );
+  async function AddAndUpdateHandler(expenseData) {
+    setIsLoading(true);
+    try {
+      if (isEditing) {
+        expensesCtx.updateExpense(
+          editedExpenseId,
+          expenseData // мы заменили эти dummy данные на expenseData из ExpenseForm {description: "test!!!", amount: 10.0, date: new Date("2030-10-10"),}
+        );
+        await updateExpense(editedExpenseId, expenseData);
+      } else {
+        const id = await storeExpense(expenseData);
+        expensesCtx.addExpense({ ...expenseData, id: id });
+      }
+      navigation.goBack();
+    } catch (error) {
+      setError("Could not save data. Please try again later!");
+      setIsLoading(false);
     }
-    navigation.goBack();
+  }
+
+  function errorHandler() {
+    setError(null);
+  }
+
+  if (error && !isLoading) {
+    return <ErrorOverlay message={error} onConfirm={errorHandler} />;
+  }
+
+  if (isLoading) {
+    <LoadingOverlay />;
   }
 
   return (
@@ -72,7 +90,7 @@ function ManageExpenceScreen({ route, navigation }) {
         onSubmit={AddAndUpdateHandler}
         onCancel={cancelHandler}
         submitButtonLabel={isEditing ? "Update" : "Add"}
-        defaultValues = {selectedExpense}
+        defaultValues={selectedExpense}
       />
       {isEditing && (
         <View style={styles.deleteContainer}>
